@@ -1,6 +1,18 @@
 encoding [![Build Status](https://travis-ci.org/issue9/encoding.svg?branch=master)](https://travis-ci.org/issue9/encoding)
 ======
 
+cncoding包含了一系列编码相关的包：
+
+##### tag
+是对struct tag的解析，有一定格式要求，不具备太大的通用性。
+主要是方便issue9下其它库使用。
+
+##### version
+版本号解析包，支持大部分格式的版本格式解析。
+
+##### ini
+功能比较全面的ini格式文本解析包。
+
 ### 安装
 
 ```shell
