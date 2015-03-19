@@ -31,7 +31,7 @@ import (
 )
 
 // 当前库的版本
-const Version = "0.1.0.141220"
+const Version = "0.1.1.150319"
 
 // 将第二种风格的struct tag转换成第一种风格的。
 var styleReplace = strings.NewReplacer("(", ",", ")", "")
