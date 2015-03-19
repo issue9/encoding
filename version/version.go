@@ -86,11 +86,9 @@ func Parse(str string) (ret []string, err error) {
 
 // 使用自定义函数比较两个版本号的大小。
 //
-// comp为自定义函数，其作用为依次比较v1,v2两个参数被Parse()
-// 解析出来的元素。其原型为：
+// comp为自定义函数，其作用为依次比较v1,v2两个参数被Parse()解析出来的元素。其原型为：
 //  func(word1, word2 string)int
-// 具体实现方式可参照默认的比较函数：defaultCompare()。
-// 当解析出错时，会触发panic。
+// 具体实现方式可参照默认的比较函数：defaultCompare()。当解析出错时，会触发panic。
 func CompareFunc(v1, v2 string, comp func(word1, word2 string) int) (int, error) {
 	if comp == nil { // 为空，使用默认的比较函数
 		return Compare(v1, v2)
@@ -146,8 +144,7 @@ const (
 	none // 保持在最后。
 )
 
-// 可识别的后缀名字符串
-// 供defaultCompare()函数中使用
+// 可识别的后缀名字符串。供defaultCompare()函数中使用。
 var suffix = map[string]int{
 	"":      none,
 	"build": build,
@@ -159,8 +156,8 @@ var suffix = map[string]int{
 	"a":     alpha,
 }
 
-// 将一个单词转换为数值，该单词为从Parse()函数返回的数组元素，所以只能为
-// state表示的三种状态。供defaultCompare()函数使用。
+// 将一个单词转换为数值，该单词为从Parse()函数返回的数组元素，
+// 所以只能为state表示的三种状态。供defaultCompare()函数使用。
 //
 // state，表示num的状态：0表示空值；1表示是个后缀；2表示正常的数值转换而来。
 func atoi(word string) (num int, state int) {
@@ -222,7 +219,7 @@ var m = [][]int{
 	[]int{1, 1, 2},
 }
 
-// 默认的比较函数
+// 默认的比较函数。
 func defaultCompare(word1, word2 string) int {
 	v1, v1State := atoi(word1)
 	v2, v2State := atoi(word2)

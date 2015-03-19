@@ -14,7 +14,7 @@ import (
 	"unicode"
 )
 
-// 表示ini的语法错误信息
+// 表示ini的语法错误信息。
 type SyntaxError struct {
 	Line int
 	Msg  string
@@ -57,8 +57,8 @@ func (t *Token) Copy() *Token {
 // ini数据的读取操作类。
 // 注释只支持以`#`,`;`开头的行，不支持行尾注释；
 //
-// 读取的内容，Element元素的首尾空格将被去除
-// 但注释不会作此处理，包括换行符都将原样输出。
+// 读取的内容，Element元素的首尾空格将被去除但注释不会作此处理，
+// 包括换行符都将原样输出。
 type Reader struct {
 	reader *bufio.Reader
 	eof    bool // 已经读取完毕
@@ -81,10 +81,10 @@ func NewReaderString(str string) *Reader {
 	return NewReader(strings.NewReader(str))
 }
 
-// 返回下一个Token，当内容读取完毕之后，将返回Type值为EOF的Token
+// 返回下一个Token，当内容读取完毕之后，将返回Type值为EOF的Token。
 //
-// 返回的Token变量，在下将调用Token()时，数据会被重置，若需要保存
-// Token的数据，可使用Token.Copy()函数复制一份。
+// 返回的Token变量，在下将调用Token()时，数据会被重置，
+// 若需要保存Token的数据，可使用Token.Copy()函数复制一份。
 func (r *Reader) Token() (*Token, error) {
 	r.token.reset()
 
@@ -161,10 +161,10 @@ func (r *Reader) newSyntaxError(msg string) error {
 
 // 将ini转换成map[string]interface{}返回。
 //
-// 没有与之相对就的MarshalMap，因为map是无序的，若一个map带了section，则转换结
-// 果未必是正确的。
+// 没有与之相对就的MarshalMap，因为map是无序的，若一个map带了section，
+// 则转换结果未必是正确的。
 //
-// 若section参数不为空，则表示只返回section的内容，若没有对应内容，则返回空值
+// 若section参数不为空，则表示只返回section的内容，若没有对应内容，则返回空值。
 func UnmarshalMap(data []byte, section string) (map[string]interface{}, error) {
 	if len(data) == 0 {
 		return nil, &SyntaxError{Msg: "没有内容", Line: 0}

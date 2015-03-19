@@ -97,8 +97,8 @@ func MustGet(tag, name string, defVal ...string) []string {
 	return defVal
 }
 
-// 查询指定名称的项是否存在，若只是查找是否存在该
-// 项，使用Has()会比Get()要快上许多。
+// 查询指定名称的项是否存在，若只是查找是否存在该项，
+// 使用Has()会比Get()要快上许多。
 func Has(tag, name string) bool {
 	if len(tag) == 0 {
 		return false

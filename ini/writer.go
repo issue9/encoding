@@ -13,8 +13,8 @@ import (
 
 // 用于输出ini内容到指定的io.Writer。
 //
-// 内容并不是实时写入io.Writer的，需要调用Writer.Flush()
-// 才会真正地写入到io.Writer流中。
+// 内容并不是实时写入io.Writer的，
+// 需要调用Writer.Flush()才会真正地写入到io.Writer流中。
 type Writer struct {
 	buf    *bufio.Writer
 	line   int
