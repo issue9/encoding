@@ -24,6 +24,7 @@ func TestParse(t *testing.T) {
 		{"0.1.build1004", []string{"0", "1", "build", "1004"}},
 		{"0.1+build1004.1", []string{"0", "1", "build", "1004", "1"}},
 		{"0.1-1.0", []string{"0", "1", "1", "0"}},
+		{"0.1-.+1.0", []string{"0", "1", "1", "0"}},
 		// {"1.0.1构建日期2014", []string{"1", "0", "1", "构建日期", "2014"}},
 	}
 
@@ -38,34 +39,31 @@ func TestParse(t *testing.T) {
 func TestCompare(t *testing.T) {
 	a := assert.New(t)
 
-	const (
-		gt = iota
-		lt
-		eq
-	)
-
 	type cmpType struct {
 		v1, v2 string
-		op     int
+		op     byte
 	}
 
 	vals := []cmpType{
-		{"0.1.0", "0.1.0", eq},
-		{"1...0.0", "1.0.0", eq},
-		{"1.0-alpha", "1.0-", lt},
-		{"1.0+build1", "1.0build1.1", lt},
-		{"1.0.build1.1", "1.0build", gt},
+		{"0.1.0", "0.1.0", '='},
+		{"1...0.0", "1.0.0", '='},
+		{"1.0+-.0", "1.0.0", '='},
+		{"1.0-alpha", "1.0-", '<'},
+		{"1.0+build1", "1.0build1.1", '<'},
+		{"1.0.build1.1", "1.0build", '>'},
+		{"1.0.build+1.1", "1.0build", '>'},
+		{"1+build1.1", "1.0build", '<'},
 	}
 
 	for k, v := range vals {
 		result, err := Compare(v.v1, v.v2)
 		a.NotError(err, "在%v个元素[%v]出错", k, v)
 		switch v.op {
-		case gt:
+		case '>':
 			a.True(result > 0, "在%v个元素[%v]出错", k, v)
-		case lt:
+		case '<':
 			a.True(result < 0, "在%v个元素[%v]出错", k, v)
-		case eq:
+		case '=':
 			a.Equal(result, 0, "在%v个元素[%v]出错", k, v)
 		}
 	}
