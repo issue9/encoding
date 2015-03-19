@@ -24,7 +24,7 @@ func (s *SyntaxError) Error() string {
 	return fmt.Sprintf("unicode/ini，在第%d行发生语法错误：%v", s.Line, s.Msg)
 }
 
-// 几种元素类型
+// ini节点元素类型
 const (
 	Undefined = iota // 未定义，初始状态
 	Element

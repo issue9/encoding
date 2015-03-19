@@ -17,34 +17,20 @@ import (
 // 需要调用Writer.Flush()才会真正地写入到io.Writer流中。
 type Writer struct {
 	buf    *bufio.Writer
-	line   int
 	symbol byte
 }
 
 // 从一个io.Writer初始化Writer
-func NewWriter(w io.Writer) *Writer {
+func NewWriter(w io.Writer, commentSymbol byte) *Writer {
 	return &Writer{
 		buf:    bufio.NewWriter(w),
-		symbol: '#',
+		symbol: commentSymbol,
 	}
-}
-
-// 设置注释符号，默认为`#`
-//
-// 有数据写入之后，不能再更改，否则会触发panic
-func (w *Writer) SetCommentSymbol(symbol byte) *Writer {
-	if w.line != 0 {
-		panic("已经有数据写入，不能再次更改symbol")
-	}
-
-	w.symbol = symbol
-	return w
 }
 
 // 添加一个新的空行。
 func (w *Writer) NewLine() *Writer {
 	w.buf.WriteByte('\n')
-	w.line++
 	return w
 }
 
@@ -87,7 +73,7 @@ func (w *Writer) Flush() {
 // 将v的内容以ini格式的形式输出。
 func Marshal(v interface{}) ([]byte, error) {
 	buf := bytes.NewBufferString("")
-	w := NewWriter(buf)
+	w := NewWriter(buf, '#')
 	tree, err := scan(v)
 	if err != nil {
 		return nil, err

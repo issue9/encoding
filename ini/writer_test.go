@@ -15,7 +15,7 @@ func TestWriter(t *testing.T) {
 	a := assert.New(t)
 	buf := bytes.NewBufferString("")
 
-	w := NewWriter(buf)
+	w := NewWriter(buf, '#')
 	a.NotNil(w)
 
 	w.AddElement("key", "val")

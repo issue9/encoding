@@ -28,7 +28,7 @@ func defaultGetFunc(v reflect.Value) (string, error) {
 
 var defaultGet = reflect.ValueOf(defaultGetFunc)
 
-type elem struct {
+type elem struct { // 每个节点的值
 	val reflect.Value
 
 	// 将字符串转换并保存到elem.val中，函数原型为参照defaultSetFunc
@@ -66,8 +66,8 @@ func (e *elem) callGet() (string, error) {
 //
 // NOTE: ini只有两层结构。
 type tree struct {
-	elems map[string]*elem
-	nodes map[string]map[string]*elem
+	elems map[string]*elem            // 根的元素
+	nodes map[string]map[string]*elem // section中的元素
 }
 
 // 向tree.nodes中添加元素。
