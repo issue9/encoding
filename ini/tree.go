@@ -201,13 +201,14 @@ func writeElems(elems map[string]*elem, w *Writer) error {
 // 从obj对象构建tree结构。
 func scan(obj interface{}) (*tree, error) {
 	objv := reflect.ValueOf(obj)
+
 	v := objv
-	if v.Kind() == reflect.Ptr {
+	for v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
 
-	if v.Kind() == reflect.Ptr {
-		return nil, errors.New("不接受指针的指针类型")
+	if v.Kind() != reflect.Struct {
+		return nil, errors.New("scan:只接受struct的指针")
 	}
 
 	ret := &tree{
@@ -219,12 +220,8 @@ func scan(obj interface{}) (*tree, error) {
 	var err error
 	for i := 0; i < t.NumField(); i++ {
 		vf := v.Field(i)
-		if vf.Kind() == reflect.Ptr {
+		for vf.Kind() == reflect.Ptr {
 			vf = vf.Elem()
-		}
-
-		if vf.Kind() == reflect.Ptr {
-			return nil, fmt.Errorf("成员[%v]为指针的指针", t.Field(i).Name)
 		}
 
 		if vf.Kind() == reflect.Struct {
