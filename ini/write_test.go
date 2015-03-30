@@ -77,8 +77,8 @@ func TestWrite(t *testing.T) {
 
 	for index, test := range testData {
 		buf.Reset()
-		w := NewWriter(buf, '#')
-		a.NotNil(w)
+		w, err := NewWriter(buf, '#')
+		a.NotError(err).NotNil(w)
 		for _, token := range test.tokens {
 			switch token.Type {
 			case Comment:

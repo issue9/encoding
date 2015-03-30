@@ -27,11 +27,15 @@ type Writer struct {
 // 从一个io.Writer初始化Writer。
 // w写入的writer接口；
 // commentSymbol注释符号。
-func NewWriter(w io.Writer, commentSymbol byte) *Writer {
+func NewWriter(w io.Writer, commentSymbol byte) (*Writer, error) {
+	if commentSymbol != '#' && commentSymbol != ';' {
+		return nil, errors.New("NewWriter:注释符号只能是`;`或`#`")
+	}
+
 	return &Writer{
 		buf:    bufio.NewWriter(w),
 		symbol: commentSymbol,
-	}
+	}, nil
 }
 
 // 添加一个新的空行。
@@ -111,11 +115,14 @@ func (w *Writer) Flush() {
 }
 
 // 将v实例转换成字符串返回。
-func Marshal(v interface{}) ([]byte, error) {
+func Marshal(v interface{}, commentSymbol byte) ([]byte, error) {
 	buf := new(bytes.Buffer)
-	w := NewWriter(buf, '#')
+	w, err := NewWriter(buf, commentSymbol)
+	if err != nil {
+		return nil, err
+	}
 
-	err := marshal(v, w, false)
+	err = marshal(v, w, false)
 	return buf.Bytes(), err
 }
 
