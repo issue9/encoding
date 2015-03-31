@@ -10,6 +10,24 @@ import (
 	"github.com/issue9/assert"
 )
 
+func TestToken(t *testing.T) {
+	a := assert.New(t)
+
+	token := &Token{
+		Type:  Element,
+		Key:   "key",
+		Value: "value",
+	}
+
+	t1 := token.Copy()
+	a.Equal(t1, token)
+
+	token.reset()
+	a.Equal(token.Type, Undefined).Equal(t1.Type, Element)
+	a.Equal(token.Key, "").Equal(t1.Key, "key")
+	a.Equal(token.Value, "").Equal(t1.Value, "value")
+}
+
 func testReader(t *testing.T) {
 	a := assert.New(t)
 	str := `

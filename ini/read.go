@@ -38,8 +38,8 @@ const (
 // Token用于描述每一个节点的类型信息及数据内容。
 type Token struct {
 	Type  int    // 类型，可以是上面的任意节点类型
-	Value string // 该节点对应的值
 	Key   string // 该节点的键名，仅在Type值为Element时才有效
+	Value string // 该节点对应的值
 }
 
 func (t *Token) reset() {
