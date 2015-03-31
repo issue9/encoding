@@ -95,6 +95,9 @@ func (w *Writer) AddElementf(key string, val interface{}) error {
 
 // 添加注释。能正确识别换行符。
 // 若需要添加一个不带注释符号的空，请使用NewLine()方法。
+//
+// 对于换行符的处理：简单地将\n符号去你的成\n#，
+// 所以若传递一个仅有\n的字符串，最终将输出2行空注释。
 func (w *Writer) AddComment(comment string) (err error) {
 	if strings.IndexByte(comment, '\n') > -1 { // 存在换行符
 		comment = strings.Replace(comment, "\n", "\n"+string(w.symbol), -1)

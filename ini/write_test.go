@@ -11,14 +11,14 @@ import (
 	"github.com/issue9/assert"
 )
 
-type writeTester struct {
+type tester struct {
 	tokens []*Token
 	value  string
 }
 
-var testData = []*writeTester{
+var testData = []*tester{
 	// 比较正规的写法
-	&writeTester{
+	&tester{
 		tokens: []*Token{
 			&Token{Type: Comment, Value: "comment"},
 			&Token{Type: Element, Value: "Value1", Key: "Key1"},
@@ -35,11 +35,11 @@ Key1=Value1
 	},
 
 	// 多行注释
-	&writeTester{
+	&tester{
 		tokens: []*Token{
 			&Token{Type: Comment, Value: "comment line 1"},
 			&Token{Type: Comment, Value: "comment line 2"},
-			&Token{Type: Comment, Value: ""}, // 空行
+			&Token{Type: Comment, Value: ""}, // 空注释行
 			&Token{Type: Element, Value: "value", Key: "key"},
 		},
 		value: `#comment line 1
@@ -50,23 +50,23 @@ key=value
 	},
 
 	// 带转义字符和注释行空格
-	&writeTester{
+	&tester{
 		tokens: []*Token{
 			&Token{Type: Comment, Value: "comment 1\n\n"},
 			&Token{Type: Element, Value: "value", Key: "key"},
-			&Token{Type: Comment, Value: "\n comment 3 "},
+			&Token{Type: Comment, Value: "\n comment 3"},
 			&Token{Type: Element, Value: "value", Key: "key"},
-			&Token{Type: Comment, Value: " \ncomment 4"},
+			&Token{Type: Comment, Value: "\n"},
 		},
 		value: `#comment 1
 #
 #
 key=value
 #
-# comment 3 
+# comment 3
 key=value
-# 
-#comment 4
+#
+#
 `,
 	},
 }

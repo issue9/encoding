@@ -60,8 +60,10 @@ func (t *Token) Copy() *Token {
 // ini数据的读取操作类。
 // 注释只支持以`#`,`;`开头的行，不支持行尾注释；
 //
-// 读取的内容，Element元素的首尾空格将被去除但注释不会作此处理，
-// 包括换行符都将原样输出。
+// 对于空格的处理:
+// - section:去掉首尾空格。
+// - comment:去掉尾部空格。
+// - element:去掉key和value的首尾空格
 type Reader struct {
 	reader *bufio.Reader
 	atEOF  bool // 已经读取完毕
@@ -85,9 +87,9 @@ func NewReaderString(str string) *Reader {
 }
 
 // 返回下一个Token，当内容读取完毕之后，将返回Type值为EOF的Token。
-// 返回的Token.Value都将不包含尾部的空格。
+// 返回的Token.Value都将不包含尾部的空格（包括换行符）。
 //
-// 返回的Token变量，在下次调用Token()时，数据会被重置，
+// 返回的Token变量，在下次调用Reader.Token()方法时，数据会被重置，
 // 若需要保存Token的数据，可使用Token.Copy()函数复制一份。
 func (r *Reader) Token() (*Token, error) {
 	r.token.reset()
@@ -113,8 +115,7 @@ START:
 		}
 	}
 
-	//保留注释中的尾部空格
-	buffer = strings.TrimLeftFunc(buffer, unicode.IsSpace)
+	buffer = strings.TrimSpace(buffer)
 	if len(buffer) == 0 { // 空行
 		goto START
 	}
@@ -127,17 +128,16 @@ START:
 func (r *Reader) parseLine(line string) (*Token, error) {
 	switch line[0] {
 	case '[': // section
-		line = strings.TrimRightFunc(line, unicode.IsSpace) // 防止]之后有空格
 		if line[len(line)-1] != ']' {
 			return nil, r.newSyntaxError("parseLine:section名称没有以]作为结尾")
 		}
 
 		r.token.Type = Section
-		r.token.Value = line[1 : len(line)-1]
+		r.token.Value = strings.TrimSpace(line[1 : len(line)-1])
 		return r.token, nil
 	case '#', ';': // comment
 		r.token.Type = Comment
-		r.token.Value = strings.TrimRightFunc(line[1:], unicode.IsSpace)
+		r.token.Value = line[1:]
 		return r.token, nil
 	default: // element
 		pos := strings.IndexRune(line, '=')
@@ -147,7 +147,7 @@ func (r *Reader) parseLine(line string) (*Token, error) {
 
 		r.token.Type = Element
 		r.token.Key = strings.TrimRightFunc(line[:pos], unicode.IsSpace)
-		r.token.Value = strings.TrimSpace(line[pos+1:])
+		r.token.Value = strings.TrimLeftFunc(line[pos+1:], unicode.IsSpace)
 		return r.token, nil
 	}
 
