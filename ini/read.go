@@ -9,10 +9,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/issue9/conv"
 	"io"
 	"strings"
 	"unicode"
+
+	"github.com/issue9/conv"
 )
 
 // 表示ini的语法错误信息。
@@ -34,10 +35,11 @@ const (
 	EOF // 已经读取完毕。
 )
 
+// Token用于描述每一个节点的类型信息及数据内容。
 type Token struct {
 	Type  int    // 类型，可以是上面的任意节点类型
 	Value string // 该节点对应的值
-	Key   string // 该节点的键名，如果存在的话
+	Key   string // 该节点的键名，仅在Type值为Element时才有效
 }
 
 func (t *Token) reset() {

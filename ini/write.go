@@ -18,15 +18,17 @@ import (
 //
 // 内容并不是实时写入io.Writer的，
 // 需要调用Writer.Flush()才会真正地写入到io.Writer流中。
-// 允许重复的键名和section名称。
+// 对于重复的键名和section名称并不会报错，若需要唯一值，
+// 需要用户自行解决。
 type Writer struct {
 	buf    *bufio.Writer
 	symbol byte
 }
 
-// 从一个io.Writer初始化Writer。
-// w写入的writer接口；
-// commentSymbol注释符号。
+// 声明一个新的Writer实例。
+//
+// w写入的io.Writer接口；
+// commentSymbol注释符号。只能是'#'或';'，传递其它参数将返回错误信息。
 func NewWriter(w io.Writer, commentSymbol byte) (*Writer, error) {
 	if commentSymbol != '#' && commentSymbol != ';' {
 		return nil, errors.New("NewWriter:注释符号只能是`;`或`#`")
@@ -114,7 +116,7 @@ func (w *Writer) Flush() {
 	w.buf.Flush()
 }
 
-// 将v实例转换成字符串返回。
+// 将v实例转换成[]byte。
 func Marshal(v interface{}, commentSymbol byte) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	w, err := NewWriter(buf, commentSymbol)
@@ -127,10 +129,10 @@ func Marshal(v interface{}, commentSymbol byte) ([]byte, error) {
 }
 
 // 将obj转换成文本内容。
-// inSection 是否已经存在于section中，若是，则无法再。
+// inSection 是否已经存在于section中，若是，则无法再递归调用本函数。
 func marshal(obj interface{}, w *Writer, inSection bool) error {
 	if inSection {
-		return errors.New("mashal:当前已经在section中，不能再嵌套其它section")
+		return errors.New("marshal:当前已经在section中，不能再嵌套其它section")
 	}
 
 	v := reflect.ValueOf(obj)

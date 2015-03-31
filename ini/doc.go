@@ -32,4 +32,4 @@
 //  func (v reflect.Value) (string, error)
 package ini
 
-const Version = "0.2.2.150330"
+const Version = "0.3.3.150330"
