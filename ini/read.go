@@ -12,8 +12,6 @@ import (
 	"io"
 	"strings"
 	"unicode"
-
-	"github.com/issue9/conv"
 )
 
 // 表示ini的语法错误信息。
@@ -215,40 +213,4 @@ func UnmarshalMap(data []byte, section string) (map[string]interface{}, error) {
 		}
 	} // end for
 	return m, nil
-}
-
-// 将字符串转换成struct对象
-func Unmarshal(data []byte, v interface{}) error {
-	r := NewReaderBytes(data)
-	info, err := scan(v)
-	if err != nil {
-		return err
-	}
-
-	cur := info.elems
-
-	for {
-		token, err := r.Token()
-		if err != nil {
-			return err
-		}
-
-		switch token.Type {
-		case Comment:
-			continue
-		case EOF:
-			break
-		case Element:
-			err := conv.To(token.Value, cur[token.Key])
-			if err != nil {
-				return err
-			}
-		case Section:
-			cur = info.sections[token.Key]
-		default:
-			return errors.New("未知的元素类型")
-		}
-	}
-
-	return nil
 }

@@ -128,17 +128,21 @@ func TestReader(t *testing.T) {
 }
 
 func TestUnmarshalMap(t *testing.T) {
-	str := `
+	a := assert.New(t)
+
+	// 测试数据
+	str := []byte(`
     nosectionkey=nosectionval
     [section]
     skey=sval
     [section1]
-    key =    val
-    ;comment1  
-    ### comment2
+	;comment
+	#comment
     key2=val2
-    `
-	a := assert.New(t)
+    `)
+
+	m, err := UnmarshalMap([]byte(""), "")
+	a.Error(err).Nil(m)
 
 	// 不带section参数
 	v1 := map[string]interface{}{
@@ -147,11 +151,10 @@ func TestUnmarshalMap(t *testing.T) {
 			"skey": "sval",
 		},
 		"section1": map[string]interface{}{
-			"key":  "val",
 			"key2": "val2",
 		},
 	}
-	m, err := UnmarshalMap([]byte(str), "")
+	m, err = UnmarshalMap(str, "")
 	a.NotError(err)
 	a.Equal(m, v1)
 
@@ -159,7 +162,7 @@ func TestUnmarshalMap(t *testing.T) {
 	v2 := map[string]interface{}{
 		"skey": "sval",
 	}
-	m, err = UnmarshalMap([]byte(str), "section")
+	m, err = UnmarshalMap(str, "section")
 	a.NotError(err)
 	a.Equal(m, v2)
 }

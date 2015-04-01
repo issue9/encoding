@@ -11,6 +11,7 @@ import (
 	"github.com/issue9/assert"
 )
 
+// 用于Reader和Writer的测试用例
 type tester struct {
 	tokens []*Token
 	value  string
@@ -46,6 +47,23 @@ Key1=Value1
 #comment line 2
 #
 key=value
+`,
+	},
+
+	// 各类特殊字符乱入
+	&tester{
+		tokens: []*Token{
+			&Token{Type: Comment, Value: "comme#nt"},
+			&Token{Type: Element, Value: "=Value1", Key: "Key1"},
+			&Token{Type: Element, Value: "Value2=", Key: "Key2"},
+			&Token{Type: Section, Value: "sect=ion1"},
+			&Token{Type: Element, Value: "Val#ue1", Key: "Ke;y1"},
+		},
+		value: `#comme#nt
+Key1==Value1
+Key2=Value2=
+[sect=ion1]
+Ke;y1=Val#ue1
 `,
 	},
 

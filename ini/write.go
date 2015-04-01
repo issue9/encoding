@@ -6,11 +6,9 @@ package ini
 
 import (
 	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
 )
 
@@ -45,7 +43,8 @@ func (w *Writer) NewLine() error {
 	return w.buf.WriteByte('\n')
 }
 
-// 添加section，没有嵌套功能，添加一个新的Section，意味着前一个section的结束。
+// 添加section，section没有嵌套功能，添加一个新的Section，意味着前一个section的结束。
+// section名称只能在同一行，若section值中包含换行符，则会返回错误信息。
 func (w *Writer) AddSection(section string) (err error) {
 	if strings.IndexByte(section, '\n') > -1 {
 		return errors.New("AddSection:section名称中不能包含换行符")
@@ -117,63 +116,4 @@ func (w *Writer) AddComment(comment string) (err error) {
 // 将内容输出到io.Writer中
 func (w *Writer) Flush() {
 	w.buf.Flush()
-}
-
-// 将v实例转换成[]byte。
-func Marshal(v interface{}, commentSymbol byte) ([]byte, error) {
-	buf := new(bytes.Buffer)
-	w, err := NewWriter(buf, commentSymbol)
-	if err != nil {
-		return nil, err
-	}
-
-	err = marshal(v, w, false)
-	return buf.Bytes(), err
-}
-
-// 将obj转换成文本内容。
-// inSection 是否已经存在于section中，若是，则无法再递归调用本函数。
-func marshal(obj interface{}, w *Writer, inSection bool) error {
-	if inSection {
-		return errors.New("marshal:当前已经在section中，不能再嵌套其它section")
-	}
-
-	v := reflect.ValueOf(obj)
-	for v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-
-	if v.Kind() != reflect.Struct {
-		return errors.New("marshal:只接受struct指针类型")
-	}
-
-	t := v.Type()
-	for i := 0; i < t.NumField(); i++ {
-		ft := t.Field(i)
-		tag := ft.Tag.Get("ini")
-		name := ft.Name
-
-		if len(tag) > 0 {
-			if tag[0] == '-' {
-				continue
-			}
-			tags := strings.SplitAfterN(tag, ",", 2)
-			if len(tags[0]) > 0 {
-				name = tags[0]
-			}
-
-			if strings.ToLower(tags[1]) == "section" { // section
-				w.AddSection(name)
-				err := marshal(v.Field(i).Interface(), w, false)
-				if err != nil {
-					return err
-				}
-				continue
-			}
-		}
-
-		w.AddElementf(name, v.Field(i).Interface())
-	}
-
-	return nil
 }
