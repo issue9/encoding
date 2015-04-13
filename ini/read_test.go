@@ -133,7 +133,11 @@ func TestReader(t *testing.T) {
 func TestUnmarshalMap(t *testing.T) {
 	a := assert.New(t)
 
-	// 测试数据
+	// 传递空的字符串，将返回错误信息。
+	m, err := UnmarshalMap([]byte(""))
+	a.Error(err).Nil(m)
+
+	// 带section
 	str := []byte(`
     nosectionkey=nosectionval
     [section]
@@ -143,30 +147,40 @@ func TestUnmarshalMap(t *testing.T) {
 	#comment
     key2=val2
     `)
-
-	// 传递空的字符串，将返回错误信息。
-	m, err := UnmarshalMap([]byte(""), "")
-	a.Error(err).Nil(m)
-
-	// 不带section参数
-	v1 := map[string]interface{}{
-		"nosectionkey": "nosectionval",
-		"section": map[string]interface{}{
+	v1 := map[string]map[string]string{
+		"": map[string]string{"nosectionkey": "nosectionval"},
+		"section": map[string]string{
 			"skey": "sval",
 		},
-		"section1": map[string]interface{}{
+		"section1": map[string]string{
 			"key2": "val2",
 		},
 	}
-	m, err = UnmarshalMap(str, "")
+	m, err = UnmarshalMap(str)
 	a.NotError(err)
 	a.Equal(m, v1)
 
-	// 带section参数
-	v2 := map[string]interface{}{
-		"skey": "sval",
+	// 不带section
+	str = []byte(`
+    nosectionkey=nosectionval
+    `)
+	v1 = map[string]map[string]string{
+		"": map[string]string{"nosectionkey": "nosectionval"},
 	}
-	m, err = UnmarshalMap(str, "section")
+	m, err = UnmarshalMap(str)
 	a.NotError(err)
-	a.Equal(m, v2)
+	a.Equal(m, v1)
+
+	// 只有section
+	str = []byte(`
+	[section]
+    nosectionkey=nosectionval
+    `)
+	v1 = map[string]map[string]string{
+		"":        map[string]string{},
+		"section": map[string]string{"nosectionkey": "nosectionval"},
+	}
+	m, err = UnmarshalMap(str)
+	a.NotError(err)
+	a.Equal(m, v1)
 }

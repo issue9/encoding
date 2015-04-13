@@ -167,27 +167,26 @@ func (r *Reader) newSyntaxError(msg string) error {
 	}
 }
 
-// 将ini转换成map[string]interface{}返回。
+// 将ini转换成map[string]map[string]string格式的数据。其内容表示如下：
+//  map[string]map[string]string{
+//      "" : map[string]string{"k1":"v1", "K2":"v2"},
+//      "section1" : map[string]string{"k1":"v1", "k2":"v2"},
+//  }
+// 索引值为空的map表示的是非section下的键值对。
 //
 // 没有与之相对就的MarshalMap，因为map是无序的，若一个map带了section，
 // 则转换结果未必是正确的。
-//
-// 若section参数不为空，则表示只返回section的内容，若没有对应内容，则返回空值。
-func UnmarshalMap(data []byte, section string) (map[string]interface{}, error) {
+func UnmarshalMap(data []byte) (map[string]map[string]string, error) {
 	if len(data) == 0 {
 		return nil, &SyntaxError{Msg: "UnmarshalMap:没有内容", Line: 0}
 	}
 
-	m := make(map[string]interface{})
-	currSection := m
-
-	sectionFlag := false // 是否指定了section值
-	if section != "" {
-		sectionFlag = true
-		currSection = nil
-	}
+	m := make(map[string]map[string]string)
+	currSection := map[string]string{}
+	sectionName := ""
 
 	r := NewReaderBytes(data)
+LOOP:
 	for {
 		token, err := r.Token()
 		if err != nil {
@@ -198,25 +197,19 @@ func UnmarshalMap(data []byte, section string) (map[string]interface{}, error) {
 		case Comment:
 			continue
 		case EOF:
-			return m, nil
+			break LOOP
 		case Element:
-			if currSection != nil {
-				currSection[token.Key] = token.Value
-			}
+			currSection[token.Key] = token.Value
 		case Section:
-			if sectionFlag {
-				if section == token.Value {
-					currSection = m
-				} else {
-					currSection = nil
-				}
-			} else {
-				currSection = make(map[string]interface{})
-				m[token.Value] = currSection
-			}
+			m[sectionName] = currSection
+
+			currSection = map[string]string{}
+			sectionName = token.Value
 		default:
 			return nil, errors.New("UnmarshalMap:未知的元素类型")
 		}
 	} // end for
+	m[sectionName] = currSection
+
 	return m, nil
 }

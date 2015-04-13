@@ -5,4 +5,4 @@
 // ini包提供了对ini的基本操作。
 package ini
 
-const Version = "0.4.5.150414"
+const Version = "0.5.6.150414"
