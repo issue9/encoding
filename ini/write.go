@@ -46,6 +46,10 @@ func (w *Writer) NewLine() error {
 // 添加section，section没有嵌套功能，添加一个新的Section，意味着前一个section的结束。
 // section名称只能在同一行，若section值中包含换行符，则会返回错误信息。
 func (w *Writer) AddSection(section string) (err error) {
+	if len(section) == 0 {
+		return errors.New("AddSection:section名称不能为空值")
+	}
+
 	if strings.IndexByte(section, '\n') > -1 {
 		return errors.New("AddSection:section名称中不能包含换行符")
 	}
@@ -64,12 +68,12 @@ func (w *Writer) AddSection(section string) (err error) {
 
 // 添加一个键值对。
 func (w *Writer) AddElement(key, val string) (err error) {
-	if strings.IndexByte(key, '\n') > -1 {
-		return errors.New("AddElement:参数key中不能包含换行符")
+	if len(key) == 0 || len(val) == 0 {
+		return errors.New("AddElement:参数key和val都不能为空")
 	}
 
-	if strings.IndexByte(val, '\n') > -1 {
-		return errors.New("AddElement:参数val中不能包含换行符")
+	if strings.IndexByte(key, '\n') > -1 || strings.IndexByte(val, '\n') > -1 {
+		return errors.New("AddElement:参数key和val都不能包含换行符")
 	}
 
 	if _, err = w.buf.WriteString(key); err != nil {

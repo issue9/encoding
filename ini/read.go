@@ -130,8 +130,11 @@ func (r *Reader) parseLine(line string) (*Token, error) {
 			return nil, r.newSyntaxError("parseLine:section名称没有以]作为结尾")
 		}
 
-		r.token.Type = Section
 		r.token.Value = strings.TrimSpace(line[1 : len(line)-1])
+		if len(r.token.Value) == 0 {
+			return nil, r.newSyntaxError("parseLine:section名称不能为空字符串")
+		}
+		r.token.Type = Section
 		return r.token, nil
 	case '#', ';': // comment
 		r.token.Type = Comment
@@ -141,6 +144,9 @@ func (r *Reader) parseLine(line string) (*Token, error) {
 		pos := strings.IndexRune(line, '=')
 		if pos < 0 {
 			return nil, r.newSyntaxError("parseLine:表达式中未找到`=`符号")
+		}
+		if pos == 0 || pos == len(line)-1 {
+			return nil, r.newSyntaxError("parseLine:键名或是键值不能为空")
 		}
 
 		r.token.Type = Element

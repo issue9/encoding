@@ -53,6 +53,9 @@ func TestReader_ParseLine(t *testing.T) {
 		// 各类错误格式
 		&test{value: "[section", isError: true},
 		&test{value: "key val", isError: true},
+		&test{value: "[]", isError: true},
+		&test{value: "i=", isError: true},
+		&test{value: "=i", isError: true},
 	}
 
 	r := NewReader(nil)
