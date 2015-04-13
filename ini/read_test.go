@@ -144,6 +144,7 @@ func TestUnmarshalMap(t *testing.T) {
     key2=val2
     `)
 
+	// 传递空的字符串，将返回错误信息。
 	m, err := UnmarshalMap([]byte(""), "")
 	a.Error(err).Nil(m)
 
