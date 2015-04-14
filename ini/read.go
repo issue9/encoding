@@ -145,8 +145,8 @@ func (r *Reader) parseLine(line string) (*Token, error) {
 		if pos < 0 {
 			return nil, r.newSyntaxError("parseLine:表达式中未找到`=`符号")
 		}
-		if pos == 0 || pos == len(line)-1 {
-			return nil, r.newSyntaxError("parseLine:键名或是键值不能为空")
+		if pos == 0 { // 键名不能为空，键值不能为空
+			return nil, r.newSyntaxError("parseLine:键名不能为空")
 		}
 
 		r.token.Type = Element

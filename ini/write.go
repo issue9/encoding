@@ -68,8 +68,8 @@ func (w *Writer) AddSection(section string) (err error) {
 
 // 添加一个键值对。
 func (w *Writer) AddElement(key, val string) (err error) {
-	if len(key) == 0 || len(val) == 0 {
-		return errors.New("AddElement:参数key和val都不能为空")
+	if len(key) == 0 { // val可以为空，key不能为空
+		return errors.New("AddElement:参数key不能为空")
 	}
 
 	if strings.IndexByte(key, '\n') > -1 || strings.IndexByte(val, '\n') > -1 {

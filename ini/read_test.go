@@ -49,12 +49,12 @@ func TestReader_ParseLine(t *testing.T) {
 		&test{value: "k ey = val", isError: false, token: &Token{Type: Element, Key: "k ey", Value: "val"}},
 		&test{value: "key = v al", isError: false, token: &Token{Type: Element, Key: "key", Value: "v al"}},
 		&test{value: "key = v=al", isError: false, token: &Token{Type: Element, Key: "key", Value: "v=al"}},
+		&test{value: "key =", isError: false, token: &Token{Type: Element, Key: "key", Value: ""}},
 
 		// 各类错误格式
 		&test{value: "[section", isError: true},
 		&test{value: "key val", isError: true},
 		&test{value: "[]", isError: true},
-		&test{value: "i=", isError: true},
 		&test{value: "=i", isError: true},
 	}
 
