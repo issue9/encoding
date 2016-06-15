@@ -12,13 +12,13 @@ import (
 	"strings"
 )
 
-var ErrInvalidVersion = errors.New("无效的版本号字符串")
-
+// 表示结构体字段的类型，版本号要嘛是字符串，要嘛是数值
 const (
 	fieldTypeNumber = iota
 	fieldTypeString
 )
 
+// 对每个字段的描述
 type field struct {
 	Type  int
 	Seq   map[byte]int

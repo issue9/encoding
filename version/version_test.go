@@ -37,4 +37,6 @@ func TestParse(t *testing.T) {
 		Equal(semver.Minor, 3).
 		Equal(semver.Patch, 19).
 		Equal(semver.PreRelease, "pre.release")
+
+	a.Error(Parse(semver, "2..1"))
 }
