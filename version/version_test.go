@@ -69,8 +69,8 @@ func TestGetFields(t *testing.T) {
 	a.Error(err).Nil(fields)
 
 	o4 := &struct {
-		V1 int    `version:"0,number,.1"`
 		V2 string `version:"1,string,.2,+1,-0"`
+		V1 int    `version:"0,number,.1"`
 		V3 string `version:"2,string"`
 	}{}
 	fields, err = getFields(o4)

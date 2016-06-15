@@ -2,7 +2,24 @@
 // Use of this source code is governed by a MIT
 // license that can be found in the LICENSE file.
 
-// 版本号解析工具
+// version 是一个通知的版本号解析工具，通将一个版本号字符串解析到一个结构体中。
+//
+// version 通过 struct tag 的相关定义来解析版本号字符串。包含了以下标签。
+// - index 该字段的编号，也是默认的解析顺序(0 是入口)，只能为整数，唯一；
+// - type 该字体的类型，可以值为 number(数字)、string(字符串)；
+// - route 表示当前字段的结束字符，以及对应的需要跳转到的索引值值。
+// 比如以下定义的结构体：
+//  type struct Version {
+//      Major int    `version:"0,number,.1,+2"`
+//      Minor int    `version:"1,number,.2"`
+//      Build string `version:"2,number"`
+//  }
+// 在解析时，首先会拿到索引为 0 的字段，也就是 Major，然后对字符串进行
+// 依次比较，如果碰到符号 `.` 则，将前面的字符串转换成数值保存 Major，
+// 然后跳到索引号为 1 的 Minor，再次对后续的字符串进行依次比较；若碰到
+// 的是字符 `+` 则跳到索引值为 2 的 Build 字段，依次对后续的字符进行比
+// 较；若碰到结尾了，而直接结束。
+// 具体的定义，可参考下自带的 SemVersion。
 package version
 
 import (
