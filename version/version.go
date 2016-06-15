@@ -7,9 +7,11 @@ package version
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 // 表示结构体字段的类型，版本号要嘛是字符串，要嘛是数值
@@ -20,9 +22,10 @@ const (
 
 // 对每个字段的描述
 type field struct {
-	Type  int
-	Seq   map[byte]int
-	Value reflect.Value
+	name   string        // 字段名称
+	Type   int           // 该字段的类型，数值或是字符串
+	Routes map[byte]int  // 该字段的路由，根据不同的字符，会跳到不同的元素中解析
+	Value  reflect.Value // 该字段的 reflect.Value 类型，方便设置值。
 }
 
 // 解析版本号字符串到 obj 中。
@@ -40,7 +43,7 @@ func Parse(obj interface{}, ver string) error {
 
 		if i < len(ver) { // 未结束字符串
 			b := ver[i]
-			nextIndex, found = field.Seq[b]
+			nextIndex, found = field.Routes[b]
 			if !found {
 				continue
 			}
@@ -67,7 +70,8 @@ func Parse(obj interface{}, ver string) error {
 	return nil
 }
 
-func getFields(obj interface{}) ([]*field, error) {
+// 将 obj 的所有可导出字段转换成 field 的描述形式，并以数组形式返回。
+func getFields(obj interface{}) (map[int]*field, error) {
 	v := reflect.ValueOf(obj)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -78,34 +82,47 @@ func getFields(obj interface{}) ([]*field, error) {
 	}
 	t := v.Type()
 
-	fields := make([]*field, v.NumField(), v.NumField())
+	fields := make(map[int]*field, v.NumField())
 	for i := 0; i < v.NumField(); i++ {
+		name := t.Field(i).Name
+
 		tags := strings.Split(t.Field(i).Tag.Get("version"), ",")
 		if len(tags) < 2 {
-			return nil, errors.New("缺少必要的标签元素")
+			return nil, fmt.Errorf("字段[%v]缺少必要的标签元素", name)
 		}
 
+		// 不可导出
+		if unicode.IsLower(rune(name[0])) {
+			return nil, fmt.Errorf("字段[%v]标记了 version 标记，但无法导出", name)
+		}
+
+		// tags[0]
 		index, err := strconv.Atoi(tags[0])
 		if err != nil {
 			return nil, err
 		}
+		if _, found := fields[index]; found {
+			return nil, fmt.Errorf("字段[%v]的索引值[%v]已经存在", name, index)
+		}
 
-		field := &field{Seq: make(map[byte]int, 2)}
+		// tags[1]
+		field := &field{Routes: make(map[byte]int, 2), name: name}
 		switch tags[1] {
 		case "number":
 			field.Type = fieldTypeNumber
 		case "string":
 			field.Type = fieldTypeString
 		default:
-			return nil, errors.New("无效的标签：" + tags[1])
+			return nil, fmt.Errorf("字段[%v]包含无效的标签：", name, tags[1])
 		}
 
+		// tags[2...]
 		for _, v := range tags[2:] {
 			n, err := strconv.Atoi(v[1:])
 			if err != nil {
 				return nil, err
 			}
-			field.Seq[v[0]] = n
+			field.Routes[v[0]] = n
 		}
 
 		field.Value = v.Field(i)
@@ -113,5 +130,22 @@ func getFields(obj interface{}) ([]*field, error) {
 		fields[index] = field
 	}
 
+	if err := checkFields(fields); err != nil {
+		return nil, err
+	}
+
 	return fields, nil
+}
+
+// 检测每个元素中的路由项都能找到对应的元素。
+func checkFields(fields map[int]*field) error {
+	for _, field := range fields {
+		for b, index := range field.Routes {
+			if _, found := fields[index]; !found {
+				return fmt.Errorf("字段[%v]对应的路由项[%v]的值不存在", field.name, b)
+			}
+		}
+	}
+
+	return nil
 }

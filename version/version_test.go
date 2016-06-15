@@ -40,3 +40,42 @@ func TestParse(t *testing.T) {
 
 	a.Error(Parse(semver, "2..1"))
 }
+
+func TestGetFields(t *testing.T) {
+	a := assert.New(t)
+
+	// 不可导出
+	o1 := &struct {
+		v1 int `version:"0,number"`
+	}{}
+	fields, err := getFields(o1)
+	a.Error(err).Nil(fields)
+
+	// 重复的索引值
+	o2 := &struct {
+		V1 int    `version:"0,number,.1"`
+		V2 string `version:"0,string"`
+	}{}
+	fields, err = getFields(o2)
+	a.Error(err).Nil(fields)
+
+	// 路由项不存在
+	o3 := &struct {
+		V1 int    `version:"0,number,.3"`
+		V2 string `version:"1,string,.2,+1,-0"`
+		V3 string `version:"2,string"`
+	}{}
+	fields, err = getFields(o3)
+	a.Error(err).Nil(fields)
+
+	o4 := &struct {
+		V1 int    `version:"0,number,.1"`
+		V2 string `version:"1,string,.2,+1,-0"`
+		V3 string `version:"2,string"`
+	}{}
+	fields, err = getFields(o4)
+	a.NotError(err).
+		Equal(fields[0].Type, fieldTypeNumber).
+		Equal(fields[0].Routes['.'], 1).
+		Equal(fields[1].Routes['+'], 1)
+}
