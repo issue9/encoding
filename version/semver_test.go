@@ -76,3 +76,16 @@ func TestSemVersion_String(t *testing.T) {
 	sv.Build = ""
 	a.Equal(sv.String(), "1.22.1234-alpha1.0")
 }
+
+func TestSemVerCompare(t *testing.T) {
+	a := assert.New(t)
+
+	v, err := SemVerCompare("1.0.0", "1.0.0")
+	a.NotError(err).True(v == 0)
+
+	v, err = SemVerCompare("1.2.0", "1.0.0")
+	a.NotError(err).True(v > 0)
+
+	v, err = SemVerCompare("1.2.0", "1.2.1")
+	a.NotError(err).True(v < 0)
+}

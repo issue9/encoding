@@ -103,3 +103,18 @@ func SemVer(ver string) (*SemVersion, error) {
 	}
 	return semver, nil
 }
+
+// 比较两个 semver 版本号
+func SemVerCompare(ver1, ver2 string) (int, error) {
+	v1, err := SemVer(ver1)
+	if err != nil {
+		return 0, err
+	}
+
+	v2, err := SemVer(ver2)
+	if err != nil {
+		return 0, err
+	}
+
+	return v1.Compare(v2), nil
+}
